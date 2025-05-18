@@ -69,11 +69,44 @@
             cursor: pointer;
         }
         
+        /* Mobile Header */
+        .mobile-header {
+            display: none;
+            background-color: white;
+            height: 56px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        
+        .mobile-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #65676b;
+            cursor: pointer;
+        }
+        
+        .mobile-tab.active {
+            color: #1877f2;
+        }
+        
+        .mobile-tab i {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
         /* Main Content Layout */
         .container {
             display: flex;
             max-width: 1200px;
             margin: 20px auto;
+            padding-bottom: 70px; /* Space for mobile footer */
         }
         
         /* Left Sidebar */
@@ -114,12 +147,14 @@
             display: flex;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
         .marketplace-title {
             font-size: 24px;
             font-weight: bold;
             margin-right: 20px;
+            margin-bottom: 10px;
         }
         
         .create-new {
@@ -130,6 +165,7 @@
             padding: 8px 12px;
             font-weight: bold;
             cursor: pointer;
+            margin-bottom: 10px;
         }
         
         .categories {
@@ -137,6 +173,8 @@
             overflow-x: auto;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
         
         .category {
@@ -148,6 +186,7 @@
             text-align: center;
             cursor: pointer;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
         
         .category.active {
@@ -185,6 +224,10 @@
         
         .item-title {
             margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         
         .item-location {
@@ -215,10 +258,40 @@
             margin-bottom: 8px;
         }
         
+        /* Mobile Filter Button */
+        .mobile-filter-btn {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background-color: #1877f2;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 90;
+            cursor: pointer;
+        }
+        
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+        
         @media (max-width: 1000px) {
             .right-sidebar {
                 display: none;
+            }
+            
+            .mobile-filter-btn {
+                display: flex;
             }
         }
         
@@ -228,15 +301,61 @@
             }
             
             .main-content {
-                padding: 0 10px;
+                padding: 0;
+            }
+            
+            .items-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .item-image {
+                height: 150px;
+            }
+            
+            .item-details {
+                padding: 8px;
+            }
+            
+            .mobile-header {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .header .search-bar {
+                display: none;
+            }
+            
+            .header .user-menu {
+                margin-left: 0;
+            }
+            
+            .marketplace-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .marketplace-title {
+                margin-bottom: 5px;
+            }
+            
+            .create-new {
+                width: 100%;
+            }
+            
+            .category {
+                min-width: 100px;
+                padding: 8px;
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="logo">CHULALOHE</div>
+        <div class="logo">Marketplace</div>
         <div class="search-bar">
             <input type="text" placeholder="Search Marketplace">
         </div>
@@ -270,15 +389,15 @@
             
             <div class="categories">
                 <div class="category active">All</div>
-                <div class="category">Chicky</div>
-                <div class="category">Beefy</div>
-                <div class="category">Porky</div>
-                <div class="category">Fishy</div>
-                <div class="category">Hotdogy</div>
-                <div class="category">Ready2Eaty</div>
+                <div class="category">Vehicles</div>
+                <div class="category">Property</div>
+                <div class="category">Electronics</div>
+                <div class="category">Furniture</div>
+                <div class="category">Clothing</div>
+                <div class="category">Hobbies</div>
                 <div class="category">Family</div>
-                <div class="category">Grocery</div>
-                <div class="category">Promohi</div>
+                <div class="category">Garden</div>
+                <div class="category">Sports</div>
             </div>
             
             <div class="items-grid">
@@ -286,48 +405,48 @@
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
                 <div class="item-card">
                     <div class="item-image"></div>
                     <div class="item-details">
-                        <div class="item-price">P0.00</div>
-                        <div class="item-title">Item Title</div>
+                        <div class="item-price">$0.00</div>
+                        <div class="item-title">Item Title Goes Here</div>
                         <div class="item-location">Location</div>
                     </div>
                 </div>
@@ -363,6 +482,31 @@
                 </div>
             </div>
         </aside>
+    </div>
+    
+    <!-- Mobile Filter Button -->
+    <div class="mobile-filter-btn">
+        <i class="fas fa-sliders-h"></i>
+    </div>
+    
+    <!-- Mobile Footer Navigation -->
+    <div class="mobile-header">
+        <div class="mobile-tab active">
+            <i class="fas fa-store"></i>
+            <span>Browse</span>
+        </div>
+        <div class="mobile-tab">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </div>
+        <div class="mobile-tab">
+            <i class="far fa-heart"></i>
+            <span>Saved</span>
+        </div>
+        <div class="mobile-tab">
+            <i class="fas fa-user"></i>
+            <span>Account</span>
+        </div>
     </div>
 </body>
 </html>
