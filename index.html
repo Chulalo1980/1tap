@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<!--
+  1TAP 2RESCUE
+  Created by XconCoder
+  Emergency Location Sharing System
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1TAP 2RESCUE | XconCoder</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400&display=swap">
+    <style>
+        :root {
+            --vader-black: #0A0A0A;
+            --emergency-red: #FF0000;
+            --stormtrooper: #EAEAEA;
+            --death-star: #1A1A1A;
+            --carbonite: #2A2A2A;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--vader-black);
+            color: var(--stormtrooper);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255,0,0,0.03) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255,0,0,0.03) 0%, transparent 20%);
+            touch-action: manipulation;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--death-star);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid var(--carbonite);
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--vader-black) 0%, var(--carbonite) 100%);
+            color: var(--stormtrooper);
+            padding: 24px;
+            text-align: center;
+            border-bottom: 2px solid var(--emergency-red);
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .header .logo {
+            color: var(--emergency-red);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .coder-credit {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: #555;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .form-container {
+            padding: 32px;
+            transition: all 0.5s ease;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #getLocationBtn {
+            background-color: var(--emergency-red);
+            color: var(--stormtrooper);
+            font-weight: 700;
+        }
+        
+        #getLocationBtn:hover {
+            background-color: #CC0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+        }
+        
+        #submitBtn {
+            background-color: var(--carbonite);
+            color: var(--emergency-red);
+            border: 1px solid var(--emergency-red);
+        }
+        
+        #submitBtn:hover:not(.submitted) {
+            background-color: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+        }
+        
+        #submitBtn.submitted {
+            background-color: #2E7D32;
+            color: var(--stormtrooper);
+            border-color: #2E7D32;
+            cursor: default;
+        }
+        
+        #submitBtn.submitted::after {
+            content: "✓";
+            margin-left: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        #locationStatus {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid transparent;
+        }
+        
+        .success {
+            background-color: rgba(30, 70, 40, 0.3);
+            color: #4CAF50;
+            border-left-color: #4CAF50;
+            display: block;
+        }
+        
+        .error {
+            background-color: rgba(70, 30, 30, 0.3);
+            color: #F44336;
+            border-left-color: #F44336;
+            display: block;
+        }
+        
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-top: 24px;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+            border: 1px solid var(--carbonite);
+        }
+        
+        .location-icon {
+            margin-right: 8px;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+        }
+        
+        .confirmation-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(10, 10, 10, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+        
+        .confirmation-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .confirmation-message {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            color: var(--emergency-red);
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            animation: textGlow 2s infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            from { text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+            to { text-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.6); }
+        }
+        
+        .emergency-speech {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.7);
+            color: var(--emergency-red);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .emergency-speech.visible {
+            opacity: 1;
+        }
+
+        /* Camera Styles */
+        #cameraContainer {
+            display: none;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #cameraView {
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%; /* 1:1 Aspect Ratio */
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        #videoElement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #captureBtn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--emergency-red);
+            border: 4px solid white;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        #capturedImage {
+            display: none;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%;
+            position: relative;
+            margin-top: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #capturedImage img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #retakeBtn {
+            display: none;
+            margin-top: 10px;
+            background-color: var(--carbonite);
+            color: var(--emergency-red);
+            border: 1px solid var(--emergency-red);
+            padding: 10px;
+            width: 100%;
+        }
+
+        /* Contact Number Field */
+        #contactField {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #contactNumber {
+            width: 100%;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--carbonite);
+            background-color: var(--death-star);
+            color: var(--stormtrooper);
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        #contactNumber::placeholder {
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 16px;
+                border-radius: 8px;
+            }
+            
+            .form-container {
+                padding: 24px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .confirmation-message {
+                font-size: 24px;
+            }
+            
+            .emergency-speech {
+                font-size: 12px;
+                bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="logo">1TAP 2RESCUE</span></h1>
+            <div class="coder-credit">BY XCONCODER</div>
+        </div>
+        
+        <div class="form-container">
+            <form name="locationForm" method="POST" netlify enctype="multipart/form-data">
+                <div class="button-group">
+                    <button type="button" id="getLocationBtn">
+                        <svg class="location-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                        </svg>
+                        GET MY LOCATION
+                    </button>
+                    <button type="submit" id="submitBtn">SEND FOR HELP</button>
+                </div>
+                <div id="locationStatus"></div>
+                
+                <div id="map"></div>
+                
+                <!-- Camera Section -->
+                <div id="cameraContainer">
+                    <div id="cameraView">
+                        <video id="videoElement" autoplay playsinline></video>
+                        <button type="button" id="captureBtn"></button>
+                    </div>
+                    <div id="capturedImage"></div>
+                    <button type="button" id="retakeBtn">RETAKE PHOTO</button>
+                </div>
+
+                <!-- Contact Number Field -->
+                <div id="contactField">
+                    <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter your contact number" required>
+                </div>
+                
+                <!-- Hidden fields to store location data -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+                <input type="hidden" id="address" name="address">
+                <input type="hidden" id="photoData" name="photoData">
+            </form>
+        </div>
+        
+        <div class="confirmation-overlay" id="confirmationOverlay">
+            <div class="confirmation-message">HELP IS COMING!</div>
+        </div>
+    </div>
+
+    <div class="emergency-speech" id="emergencySpeech"></div>
+
+    <!-- Load Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBT5DTfvWPFf5pcU98tO_EvJHf3-h-wEBw&libraries=places"></script>
+    
+    <script>
+        // Emergency Location Sharing System
+        document.addEventListener('DOMContentLoaded', function() {
+            const getLocationBtn = document.getElementById('getLocationBtn');
+            const locationStatus = document.getElementById('locationStatus');
+            const latitudeField = document.getElementById('latitude');
+            const longitudeField = document.getElementById('longitude');
+            const addressField = document.getElementById('address');
+            const mapElement = document.getElementById('map');
+            const submitBtn = document.getElementById('submitBtn');
+            const confirmationOverlay = document.getElementById('confirmationOverlay');
+            const form = document.forms['locationForm'];
+            const emergencySpeech = document.getElementById('emergencySpeech');
+            const cameraContainer = document.getElementById('cameraContainer');
+            const videoElement = document.getElementById('videoElement');
+            const captureBtn = document.getElementById('captureBtn');
+            const capturedImage = document.getElementById('capturedImage');
+            const retakeBtn = document.getElementById('retakeBtn');
+            const contactField = document.getElementById('contactField');
+            const contactNumber = document.getElementById('contactNumber');
+            const photoData = document.getElementById('photoData');
+            
+            let formSubmitted = false;
+            let stream = null;
+            let photoTaken = false;
+            
+            // Emergency messages
+            const emergencyMessages = [
+                "Help is on the way!",
+                "Stay calm, assistance is coming.",
+                "Emergency services have been alerted.",
+                "Your location has been shared with responders.",
+                "Hold on, help is coming soon.",
+                "Rescue team has been notified.",
+                "Emergency contact has been informed.",
+                "First responders are being dispatched."
+            ];
+            
+            // Touch event handler for emergency messages
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 0 && !formSubmitted) {
+                    const randomMessage = emergencyMessages[Math.floor(Math.random() * emergencyMessages.length)];
+                    emergencySpeech.textContent = randomMessage;
+                    emergencySpeech.classList.add('visible');
+                    
+                    // Hide after 3 seconds
+                    setTimeout(function() {
+                        emergencySpeech.classList.remove('visible');
+                    }, 3000);
+                }
+            });
+            
+            // Mouse click event for desktop testing
+            document.addEventListener('click', function(e) {
+                if (!formSubmitted && e.target.tagName !== 'BUTTON') {
+                    const randomMessage = emergencyMessages[Math.floor(Math.random() * emergencyMessages.length)];
+                    emergencySpeech.textContent = randomMessage;
+                    emergencySpeech.classList.add('visible');
+                    
+                    // Hide after 3 seconds
+                    setTimeout(function() {
+                        emergencySpeech.classList.remove('visible');
+                    }, 3000);
+                }
+            });
+            
+            getLocationBtn.addEventListener('click', function() {
+                locationStatus.textContent = "LOCATING YOUR POSITION...";
+                locationStatus.className = "";
+                locationStatus.style.display = "block";
+                
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            
+                            latitudeField.value = lat;
+                            longitudeField.value = lng;
+                            
+                            locationStatus.textContent = "LOCATION FOUND";
+                            locationStatus.className = "success";
+                            
+                            initMap(lat, lng);
+                            getAddressFromLatLng(lat, lng);
+                            
+                            getLocationBtn.style.backgroundColor = "#2E7D32";
+                            getLocationBtn.innerHTML = `
+                                <svg class="location-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                                </svg>
+                                LOCATION CONFIRMED
+                            `;
+
+                            // Start camera after getting location
+                            startCamera();
+                        },
+                        function(error) {
+                            let errorMessage;
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage = "LOCATION ACCESS DENIED. PLEASE ENABLE PERMISSIONS.";
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = "LOCATION UNAVAILABLE";
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage = "LOCATION TIMEOUT";
+                                    break;
+                                case error.UNKNOWN_ERROR:
+                                    errorMessage = "LOCATION ERROR";
+                                    break;
+                            }
+                            locationStatus.textContent = "ERROR: " + errorMessage;
+                            locationStatus.className = "error";
+                            
+                            getLocationBtn.style.backgroundColor = "#C62828";
+                        }
+                    );
+                } else {
+                    locationStatus.textContent = "GEOLOCATION NOT SUPPORTED";
+                    locationStatus.className = "error";
+                    getLocationBtn.style.backgroundColor = "#C62828";
+                }
+            });
+            
+            // Camera Functions
+            function startCamera() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'user',
+                            aspectRatio: 1 
+                        } 
+                    })
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        videoElement.srcObject = stream;
+                        cameraContainer.style.display = "block";
+                        contactField.style.display = "block";
+                    })
+                    .catch(function(error) {
+                        console.error("Camera error: ", error);
+                        locationStatus.textContent = "CAMERA ERROR: " + error.message;
+                        locationStatus.className = "error";
+                    });
+                } else {
+                    locationStatus.textContent = "CAMERA NOT SUPPORTED";
+                    locationStatus.className = "error";
+                }
+            }
+
+            captureBtn.addEventListener('click', function() {
+                if (stream && !photoTaken) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Draw image (1:1 aspect ratio from center)
+                    const size = Math.min(videoElement.videoWidth, videoElement.videoHeight);
+                    const x = (videoElement.videoWidth - size) / 2;
+                    const y = (videoElement.videoHeight - size) / 2;
+                    
+                    ctx.drawImage(videoElement, x, y, size, size, 0, 0, size, size);
+                    
+                    // Stop camera stream
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    // Display captured image
+                    const img = document.createElement('img');
+                    img.src = canvas.toDataURL('image/jpeg');
+                    capturedImage.innerHTML = '';
+                    capturedImage.appendChild(img);
+                    capturedImage.style.display = "block";
+                    
+                    // Store image data
+                    photoData.value = canvas.toDataURL('image/jpeg');
+                    
+                    // Show retake button
+                    retakeBtn.style.display = "block";
+                    photoTaken = true;
+                    
+                    // Hide camera view
+                    document.getElementById('cameraView').style.display = "none";
+                }
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                photoTaken = false;
+                capturedImage.style.display = "none";
+                retakeBtn.style.display = "none";
+                document.getElementById('cameraView').style.display = "block";
+                startCamera();
+            });
+            
+            form.addEventListener('submit', function(e) {
+                if (!formSubmitted) {
+                    e.preventDefault();
+                    
+                    // Validate contact number
+                    if (!contactNumber.value) {
+                        locationStatus.textContent = "PLEASE ENTER YOUR CONTACT NUMBER";
+                        locationStatus.className = "error";
+                        locationStatus.style.display = "block";
+                        return;
+                    }
+
+                    // Validate photo
+                    if (!photoTaken) {
+                        locationStatus.textContent = "PLEASE TAKE A PHOTO";
+                        locationStatus.className = "error";
+                        locationStatus.style.display = "block";
+                        return;
+                    }
+                    
+                    // Show loading state
+                    submitBtn.classList.add('submitted');
+                    submitBtn.innerHTML = 'SENDING ALERT...';
+                    
+                    // Simulate network delay (remove this in production)
+                    setTimeout(function() {
+                        formSubmitted = true;
+                        submitBtn.innerHTML = 'ALERT SENT ✓';
+                        
+                        // Show confirmation overlay
+                        confirmationOverlay.classList.add('active');
+                        
+                        // Hide after 3 seconds (optional)
+                        setTimeout(function() {
+                            // Actually submit the form (Netlify will handle it)
+                            form.submit();
+                        }, 3000);
+                    }, 1500);
+                }
+            });
+            
+            function initMap(lat, lng) {
+                const location = { lat: lat, lng: lng };
+                
+                map = new google.maps.Map(mapElement, {
+                    center: location,
+                    zoom: 15,
+                    styles: [
+                        {elementType: "geometry", stylers: [{color: "#1A1A1A"}]},
+                        {elementType: "labels.text.stroke", stylers: [{color: "#1A1A1A"}]},
+                        {elementType: "labels.text.fill", stylers: [{color: "#EAEAEA"}]},
+                        {
+                            featureType: "road",
+                            elementType: "geometry",
+                            stylers: [{color: "#2A2A2A"}]
+                        },
+                        {
+                            featureType: "water",
+                            elementType: "geometry",
+                            stylers: [{color: "#0A0A0A"}]
+                        },
+                        {
+                            featureType: "poi",
+                            elementType: "labels.icon",
+                            stylers: [{visibility: "off"}]
+                        }
+                    ],
+                    disableDefaultUI: true
+                });
+                
+                marker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#FF0000",
+                        fillOpacity: 1,
+                        strokeColor: "#000",
+                        strokeWeight: 3
+                    }
+                });
+                
+                mapElement.style.display = "block";
+            }
+            
+            function getAddressFromLatLng(lat, lng) {
+                const geocoder = new google.maps.Geocoder();
+                const latLng = new google.maps.LatLng(lat, lng);
+                
+                geocoder.geocode({ 'location': latLng }, function(results, status) {
+                    if (status === 'OK') {
+                        if (results[0]) {
+                            addressField.value = results[0].formatted_address;
+                        } else {
+                            addressField.value = "COORDINATES ONLY";
+                        }
+                    } else {
+                        addressField.value = "ADDRESS UNAVAILABLE";
+                    }
+                });
+            }
+
+            // Clean up camera stream when leaving page
+            window.addEventListener('beforeunload', function() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
+</body>
+</html>
